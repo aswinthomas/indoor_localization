@@ -1,5 +1,8 @@
 <?xml version="1.0"?>
 <launch>
+  <!-- laser odom -->
+  <include file="$(find indoor_localization)/launch/hector.launch" />
+
   <rosparam command="load" file="$(find indoor_localization)/params/ukf_odom_baselink_params.yaml" />
   <rosparam command="load" file="$(find outdoor_waypoint_nav)/params/navsat_params.yaml" />
   

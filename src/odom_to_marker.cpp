@@ -2,12 +2,42 @@
 #include <visualization_msgs/Marker.h>
 #include <sensor_msgs/Imu.h>
 #include <nav_msgs/Odometry.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
 
-ros::Publisher pubOdom, pubGPS, pubPositionEstimate;
-visualization_msgs::Marker odomPoints, gpsPoints, positionDisplayPoints;
+ros::Publisher pubOdom, pubGPS, pubPositionEstimate, pubPose;
+visualization_msgs::Marker odomPoints, gpsPoints, positionDisplayPoints, posePoints;
 
-double prevOdomTime, prevGPSTime, prevEstimateTime;
+double prevOdomTime, prevGPSTime, prevEstimateTime, prevPoseTime;
 double displayInterval=0.2;
+
+void poseCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg) {
+  if(fabs(prevPoseTime-ros::Time::now().toSec())<displayInterval) {
+    return;
+  }
+  prevPoseTime = ros::Time::now().toSec();
+  posePoints.header.frame_id = "/my_frame";
+  posePoints.header.stamp = ros::Time::now();
+  posePoints.ns = "points";
+  posePoints.action = visualization_msgs::Marker::ADD;
+  posePoints.pose.orientation.w = 1.0;
+  posePoints.id = 0;
+  posePoints.type = visualization_msgs::Marker::POINTS;
+  // POINTS markers use x and y scale for width/height respectively
+  posePoints.scale.x = 0.2;
+  posePoints.scale.y = 0.2;
+  // Points are red
+  posePoints.color.r = 1.0f;
+  posePoints.color.a = 1.0;
+
+  geometry_msgs::Point tempPoint;
+  tempPoint.x = msg->pose.pose.position.x;
+  tempPoint.y = msg->pose.pose.position.y;
+  tempPoint.z = msg->pose.pose.position.z;
+  posePoints.points.push_back(tempPoint);
+
+  pubPose.publish(posePoints);
+}
+
 
 void estimateCallback(const nav_msgs::Odometry::ConstPtr& msg) {
   if(fabs(prevEstimateTime-ros::Time::now().toSec())<displayInterval) {
@@ -22,8 +52,8 @@ void estimateCallback(const nav_msgs::Odometry::ConstPtr& msg) {
   positionDisplayPoints.id = 0;
   positionDisplayPoints.type = visualization_msgs::Marker::POINTS;
   // POINTS markers use x and y scale for width/height respectively
-  positionDisplayPoints.scale.x = 1.0;
-  positionDisplayPoints.scale.y = 1.0;
+  positionDisplayPoints.scale.x = 0.2;
+  positionDisplayPoints.scale.y = 0.2;
   // Points are green
   positionDisplayPoints.color.g = 1.0f;
   positionDisplayPoints.color.a = 1.0;
@@ -51,8 +81,8 @@ void encoderCallback(const nav_msgs::Odometry::ConstPtr& msg)
   odomPoints.id = 0;
   odomPoints.type = visualization_msgs::Marker::POINTS;
   // POINTS markers use x and y scale for width/height respectively
-  odomPoints.scale.x = 1.0;
-  odomPoints.scale.y = 1.0;
+  odomPoints.scale.x = 0.2;
+  odomPoints.scale.y = 0.2;
   // Points are yellow
   odomPoints.color.g = 1.0f;
   odomPoints.color.r = 1.0f;
@@ -82,8 +112,8 @@ void gpsCallback(const nav_msgs::Odometry::ConstPtr& msg)
   gpsPoints.id = 0;
   gpsPoints.type = visualization_msgs::Marker::POINTS;
   // POINTS markers use x and y scale for width/height respectively
-  gpsPoints.scale.x = 1.0;
-  gpsPoints.scale.y = 1.0;
+  gpsPoints.scale.x = 0.2;
+  gpsPoints.scale.y = 0.2;
   // Points are yellow
   gpsPoints.color.r = 1.0f;
   gpsPoints.color.a = 1.0;
@@ -106,16 +136,18 @@ int main(int argc, char **argv)
 
   ros::NodeHandle n("~");
 
-  prevOdomTime= prevGPSTime=prevEstimateTime = ros::Time::now().toSec();
+  prevOdomTime= prevGPSTime=prevEstimateTime =prevPoseTime= ros::Time::now().toSec();
 
   //odom subscriber
-  ros::Subscriber subOdom = n.subscribe("/encoder", 1000, encoderCallback);
-  ros::Subscriber subEstimate = n.subscribe("/outdoor_waypoint_nav/odometry/filtered", 1000, estimateCallback);
+  ros::Subscriber subOdom = n.subscribe("/base_odometry/odom", 1000, encoderCallback);
+  ros::Subscriber subEstimate = n.subscribe("/odometry/filtered", 1000, estimateCallback);
   ros::Subscriber subGPS = n.subscribe("/navsat/enu", 1000, gpsCallback);
+  ros::Subscriber subPose = n.subscribe("/poseupdate", 1000, poseCallback);
 
   pubPositionEstimate = n.advertise<visualization_msgs::Marker>("/estimate_position_marker", 10);
   pubOdom = n.advertise<visualization_msgs::Marker>("/odom_marker", 10);
   pubGPS = n.advertise<visualization_msgs::Marker>("/gps_marker", 10);
+  pubPose = n.advertise<visualization_msgs::Marker>("/laserodom_marker", 10);
 
   ros::spin();
 
