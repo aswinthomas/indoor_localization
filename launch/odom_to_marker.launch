@@ -1,0 +1,7 @@
+<launch>
+
+ <node pkg="indoor_localization" type="odom_to_marker_node" name="odom_to_marker_node">
+
+  </node>
+
+</launch>
