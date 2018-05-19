@@ -1,0 +1,12 @@
+- git:
+    local-name: rf2o_laser_odometry
+    uri: https://github.com/artivis/rf2o_laser_odometry
+    version: master
+- git:
+    local-name: fovis
+    uri: https://github.com/srv/fovis
+    version: kinetic
+- git:
+    local-name: libfovis
+    uri: https://github.com/srv/libfovis
+    version: kinetic

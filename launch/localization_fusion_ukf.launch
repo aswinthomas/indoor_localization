@@ -1,10 +1,18 @@
 <?xml version="1.0"?>
 <launch>
+  <param name="/use_sim_time" value="false"/>
+
   <!-- laser odom -->
-  <include file="$(find indoor_localization)/launch/hector.launch" />
+  <include file="$(find indoor_localization)/launch/r2fo.launch" />
+
+  <!-- visual odom -->
+  <include file="$(find indoor_localization)/launch/fovis.launch" />
+
+  <!-- display marker -->
+  <include file="$(find indoor_localization)/launch/odom_to_marker.launch" />
 
   <rosparam command="load" file="$(find indoor_localization)/params/ukf_odom_baselink_params.yaml" />
-  <rosparam command="load" file="$(find outdoor_waypoint_nav)/params/navsat_params.yaml" />
+  <!--<rosparam command="load" file="$(find outdoor_waypoint_nav)/params/navsat_params.yaml" />-->
   
   <node pkg="robot_localization" type="ukf_localization_node" name="ukf_odom_baselink" clear_params="true">
     <remap from="cmd_vel" to="/husky/cmd_vel"/>

@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="manager" />
+  
+  
+  <node pkg="stereo_image_proc" type="stereo_image_proc" name="rectify_stereo">
+    <remap from="left/image_raw" to="/wide_stereo/left/image_raw" />
+    <remap from="left/camera_info" to="/wide_stereo/left/camera_info" />
+    <remap from="right/image_raw" to="/wide_stereo/right/image_raw" />
+    <remap from="right/camera_info" to="/wide_stereo/right/camera_info" />
+    <remap from="/left/image_rect" to="/wide_stereo/left/image_rect" />
+    <remap from="/right/image_rect" to="/wide_stereo/right/image_rect" />
+  </node>
+
+
+  <node pkg="fovis_ros" type="fovis_stereo_odometer" name="fovis_stereo_odometer" output="screen">
+    <remap from="odometry" to="fovis_odometry" />
+    <remap from="odom_frame_id" to="odom" />
+    <remap from="base_link_frame_id" to="base_link" />
+    <remap from="publish_tf" to="false" />
+    <remap from="stereo" to="wide_stereo" />
+    <remap from="image" to="image_rect" />
+    <!--<remap from="/stereo/left/image" to="/left/image_rect" />
+    <remap from="/stereo/right/image" to="/right/image_rect" />
+    <remap from="/stereo/left/camera_info" to="/wide_stereo/left/camera_info" />
+    <remap from="/stereo/right/camera_info" to="/wide_stereo/right/camera_info" />-->
+    <param name="approximate_sync" type="bool" value="true" />
+  </node>
+</launch>
+
+<!--
+bucket_height = 80
+bucket_width = 80
+clique_inlier_threshold = 0.100000
+fast_threshold = 20
+fast_threshold_adaptive_gain = 0.005000
+feature_search_window = 25
+feature_window_size = 9
+inlier_max_reprojection_error = 1.500000
+max_keypoints_per_bucket = 25
+max_mean_reprojection_error = 10.000000
+max_pyramid_level = 3
+min_features_for_estimate = 10
+min_pyramid_level = 0
+ref_frame_change_threshold = 150
+stereo_max_disparity = 128
+stereo_max_dist_epipolar_line = 1.500000
+stereo_max_refinement_displacement = 1.000000
+stereo_require_mutual_match = true
+target_pixels_per_feature = 250
+update_target_features_with_refined = false
+use_adaptive_threshold = true
+use_bucketing = true
+use_homography_initialization = true
+use_image_normalization = false
+use_subpixel_refinement = true
+
+-->
